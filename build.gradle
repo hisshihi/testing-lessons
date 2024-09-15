@@ -17,6 +17,7 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.3')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testImplementation('org.junit.platform:junit-platform-launcher:1.10.3')
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.26.3'
     testCompileOnly 'org.projectlombok:lombok:1.18.34'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
