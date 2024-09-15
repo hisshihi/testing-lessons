@@ -9,8 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserServiceTest {
@@ -70,6 +69,17 @@ class UserServiceTest {
 //        assertTrue(maybeUser.isPresent());
 //        maybeUser.ifPresent(user -> assertEquals(REHAB, user));
 
+    }
+
+    @Test
+    void throwExceptionIfUsernameIsNull() {
+        // Проверка сразу нескольких исключений
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password")),
+                () -> assertThrows(IllegalArgumentException.class, () -> userService.login("rehab", null))
+        );
+        //            Проверка исключений
+        assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
     }
 
     @Test
