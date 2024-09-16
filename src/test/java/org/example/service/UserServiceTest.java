@@ -11,6 +11,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("fast")
+@Tag("user")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UserServiceTest {
 
@@ -55,6 +57,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("login")
     void loginSuccessIfUserExists() {
         // Шаг 1 - подготовка данных
         userService.add(REHAB);
@@ -72,6 +75,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("login")
     void throwExceptionIfUsernameIsNull() {
         // Проверка сразу нескольких исключений
         assertAll(
@@ -96,6 +100,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("login")
     void loginFailIfPasswordIsNotCorrect() {
         userService.add(REHAB);
         Optional<User> user = userService.login(REHAB.getUsername(), "123");
@@ -104,6 +109,7 @@ class UserServiceTest {
     }
 
     @Test
+    @Tag("login")
     void loginFailIfUserDoesNotExist() {
         userService.add(REHAB);
 
