@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("fast")
 @Tag("user")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+// Для того, чтобы запускать тесты по порядку, нужно использовать
+@TestMethodOrder(MethodOrderer.MethodName.class)
 class UserServiceTest {
 
     private static final User ARINA = User.of(1L, "Arina", "123");
@@ -32,6 +34,8 @@ class UserServiceTest {
     }
 
     @Test
+    @Order(1)
+    @DisplayName("users will be empty if no user added")
 //    Проверяем пустая ли коллекция пользователей
     void usersEmptyIfNoUserAdded() {
 //        System.out.println("Test 1: " + this);
@@ -56,35 +60,6 @@ class UserServiceTest {
 //        assertEquals(2, users.size());
     }
 
-    @Test
-    @Tag("login")
-    void loginSuccessIfUserExists() {
-        // Шаг 1 - подготовка данных
-        userService.add(REHAB);
-
-        // Шаг 2 - запрос на проверяемый функционал
-        Optional<User> maybeUser = userService.login(REHAB.getUsername(), REHAB.getPassword());
-
-        // Шаг 3 - проверка результата
-        assertThat(maybeUser).isPresent();
-        // Проверяем правльно ли найден пользователь
-        maybeUser.ifPresent(user -> assertThat(user).isEqualTo(REHAB));
-//        assertTrue(maybeUser.isPresent());
-//        maybeUser.ifPresent(user -> assertEquals(REHAB, user));
-
-    }
-
-    @Test
-    @Tag("login")
-    void throwExceptionIfUsernameIsNull() {
-        // Проверка сразу нескольких исключений
-        assertAll(
-                () -> assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password")),
-                () -> assertThrows(IllegalArgumentException.class, () -> userService.login("rehab", null))
-        );
-        //            Проверка исключений
-        assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
-    }
 
     @Test
     void usersConvertedToMapById() {
@@ -99,24 +74,6 @@ class UserServiceTest {
         );
     }
 
-    @Test
-    @Tag("login")
-    void loginFailIfPasswordIsNotCorrect() {
-        userService.add(REHAB);
-        Optional<User> user = userService.login(REHAB.getUsername(), "123");
-
-        assertTrue(user.isEmpty());
-    }
-
-    @Test
-    @Tag("login")
-    void loginFailIfUserDoesNotExist() {
-        userService.add(REHAB);
-
-        Optional<User> user = userService.login("Sergey", "123");
-
-        assertTrue(user.isEmpty());
-    }
 
     @AfterEach
     void deleteDataFromDatabase() {
@@ -126,6 +83,57 @@ class UserServiceTest {
     @AfterAll
     void closeConnectionPool() {
 //        System.out.println("After all");
+    }
+
+    // Обозначается, как класс с тестами
+    @Nested
+    @DisplayName("test user login functionality")
+    @Tag("login")
+    class LoginTest {
+        @Test
+        void loginSuccessIfUserExists() {
+            // Шаг 1 - подготовка данных
+            userService.add(REHAB);
+
+            // Шаг 2 - запрос на проверяемый функционал
+            Optional<User> maybeUser = userService.login(REHAB.getUsername(), REHAB.getPassword());
+
+            // Шаг 3 - проверка результата
+            assertThat(maybeUser).isPresent();
+            // Проверяем правльно ли найден пользователь
+            maybeUser.ifPresent(user -> assertThat(user).isEqualTo(REHAB));
+//        assertTrue(maybeUser.isPresent());
+//        maybeUser.ifPresent(user -> assertEquals(REHAB, user));
+
+        }
+
+        @Test
+        void throwExceptionIfUsernameIsNull() {
+            // Проверка сразу нескольких исключений
+            assertAll(
+                    () -> assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password")),
+                    () -> assertThrows(IllegalArgumentException.class, () -> userService.login("rehab", null))
+            );
+            //            Проверка исключений
+            assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
+        }
+
+        @Test
+        void loginFailIfPasswordIsNotCorrect() {
+            userService.add(REHAB);
+            Optional<User> user = userService.login(REHAB.getUsername(), "123");
+
+            assertTrue(user.isEmpty());
+        }
+
+        @Test
+        void loginFailIfUserDoesNotExist() {
+            userService.add(REHAB);
+
+            Optional<User> user = userService.login("Sergey", "123");
+
+            assertTrue(user.isEmpty());
+        }
     }
 
 }
