@@ -2,7 +2,9 @@ package org.example.service;
 
 
 import org.example.dto.User;
+import org.example.paramresolver.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.List;
 import java.util.Map;
@@ -16,11 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 // Для того, чтобы запускать тесты по порядку, нужно использовать
 @TestMethodOrder(MethodOrderer.MethodName.class)
+// Эта аннотация указывает JUnit использовать расширение UserServiceParamResolver, чтобы разрешать зависимости перед тестами.
+@ExtendWith({
+        UserServiceParamResolver.class
+})
 class UserServiceTest {
 
     private static final User ARINA = User.of(1L, "Arina", "123");
     private static final User REHAB = User.of(2L, "rehab", "111");
     private UserService userService;
+
+
 
     @BeforeAll
     void init() {
@@ -28,16 +36,16 @@ class UserServiceTest {
     }
 
     @BeforeEach
-    void prepare() {
+    void prepare(UserService userService) {
 //        System.out.println("Before each: " + this);
-        userService = new UserService();
+        this.userService = userService;
     }
 
     @Test
     @Order(1)
     @DisplayName("users will be empty if no user added")
 //    Проверяем пустая ли коллекция пользователей
-    void usersEmptyIfNoUserAdded() {
+    void usersEmptyIfNoUserAdded(UserService userService) {
 //        System.out.println("Test 1: " + this);
 
         List<User> users = userService.getAll();
