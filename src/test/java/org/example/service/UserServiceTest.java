@@ -5,10 +5,14 @@ import org.example.dto.User;
 import org.example.paramresolver.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,7 +32,14 @@ class UserServiceTest {
     private static final User REHAB = User.of(2L, "rehab", "111");
     private UserService userService;
 
-
+    static Stream<Arguments> getArgumentsForLoginTest() {
+        return Stream.of(
+                Arguments.of("Arina", "123", Optional.of(ARINA)),
+                Arguments.of("rehab", "111", Optional.of(REHAB))
+//                Arguments.of("rehab", "111", Optional.empty()),
+//                Arguments.of("rehab", "111", Optional.empty())
+        );
+    }
 
     @BeforeAll
     void init() {
@@ -68,7 +79,6 @@ class UserServiceTest {
 //        assertEquals(2, users.size());
     }
 
-
     @Test
     void usersConvertedToMapById() {
         userService.add(REHAB, ARINA);
@@ -81,7 +91,6 @@ class UserServiceTest {
                 () -> assertThat(users).containsValues(REHAB, ARINA)
         );
     }
-
 
     @AfterEach
     void deleteDataFromDatabase() {
@@ -142,6 +151,35 @@ class UserServiceTest {
 
             assertTrue(user.isEmpty());
         }
+
+        @ParameterizedTest(name = "{arguments} test")
+        // Аннотация @ParameterizedTest используется для параметризованных тестов.
+// Тест будет запущен несколько раз с разными входными параметрами.
+// {arguments} в аннотации name позволяет выводить аргументы теста в отчёте о тестах для каждого прогноза.
+
+//    @ArgumentsSource()
+        // Подставляет null парамтер(но только 1 как и для всех нижних)
+//        @NullSource
+//        @EmptySource
+//        @ValueSource(strings = {
+//                "Denis", "Arina"
+//        })
+        @MethodSource("org.example.service.UserServiceTest#getArgumentsForLoginTest")
+        // Аннотация @MethodSource указывает на метод, который возвращает набор аргументов для теста.
+// В данном случае это метод getArgumentsForLoginTest() в классе UserServiceTest.
+
+//        @CsvFileSource(resources = "/login-test-data.csv", delimiter = ',', numLinesToSkip = 1)
+//        @CsvSource({
+//                "Arina,123",
+//                "rehab,111"
+//        })
+        @DisplayName("login param name")
+        void loginParametrizetTest(String username, String password, Optional<User> user) {
+            userService.add(REHAB, ARINA);
+            Optional<User> maybeUser = userService.login(username, password);
+            assertThat(maybeUser).isEqualTo(user);
+        }
+
     }
 
 }
