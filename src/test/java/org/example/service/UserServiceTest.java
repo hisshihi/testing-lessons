@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -107,7 +108,28 @@ class UserServiceTest {
     @DisplayName("test user login functionality")
     @Tag("login")
     class LoginTest {
+
+        // Также можно указать время выполнения теста с помощью assertTimeout
         @Test
+        void checkLoginFunctionalityPerformance() {
+//            Optional<User> user = assertTimeout(Duration.ofMillis(200), () -> {
+//                Thread.sleep(300);
+//                return userService.login("rehab", REHAB.getPassword());
+//            });
+
+            // Также можно указать, что тест будет выполняться в отдельном потоке
+            System.out.println(Thread.currentThread().getName());
+            Optional<User> user = assertTimeoutPreemptively(Duration.ofMillis(200), () -> {
+                System.out.println(Thread.currentThread().getName());
+                Thread.sleep(300);
+                return userService.login(REHAB.getUsername(), REHAB.getPassword());
+            });
+
+        }
+
+        @Test
+        // Помечаем тест как flaky и отключаем его выполнение
+        @Disabled("flaky, need to see")
         void loginSuccessIfUserExists() {
             // Шаг 1 - подготовка данных
             userService.add(REHAB);
@@ -135,8 +157,12 @@ class UserServiceTest {
             assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
         }
 
-        @Test
-        void loginFailIfPasswordIsNotCorrect() {
+//        @Test
+        // Добавляем несклько выполнений тестов
+        // Указываем сколько раз будет выполняться тест и как будет отображаться
+        @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
+        // Также можно указать в аргументах, что мы хотим вывести более подробную информацию с помощью RepetitionInfo
+        void loginFailIfPasswordIsNotCorrect(RepetitionInfo repetitionInfo) {
             userService.add(REHAB);
             Optional<User> user = userService.login(REHAB.getUsername(), "123");
 
