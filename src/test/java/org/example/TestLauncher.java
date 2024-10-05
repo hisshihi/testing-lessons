@@ -1,4 +1,4 @@
-package org.example.service;
+package org.example;
 
 import org.junit.platform.engine.discovery.DiscoverySelectors;
 import org.junit.platform.launcher.Launcher;

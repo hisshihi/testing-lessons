@@ -1,14 +1,16 @@
 package org.example.service;
 
 
+import org.example.TestBase;
 import org.example.dto.User;
-import org.example.paramresolver.UserServiceParamResolver;
+import org.example.extension.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +27,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.MethodName.class)
 // Эта аннотация указывает JUnit использовать расширение UserServiceParamResolver, чтобы разрешать зависимости перед тестами.
 @ExtendWith({
-        UserServiceParamResolver.class
+        UserServiceParamResolver.class,
+        PostProcessingExtension.class,
+        ConditionalExtension.class,
+        ThrowableExtension.class
 })
-class UserServiceTest {
+class UserServiceTest extends TestBase {
 
     private static final User ARINA = User.of(1L, "Arina", "123");
     private static final User REHAB = User.of(2L, "rehab", "111");
@@ -57,7 +62,10 @@ class UserServiceTest {
     @Order(1)
     @DisplayName("users will be empty if no user added")
 //    Проверяем пустая ли коллекция пользователей
-    void usersEmptyIfNoUserAdded(UserService userService) {
+    void usersEmptyIfNoUserAdded(UserService userService) throws IOException {
+        if (true) {
+            throw new RuntimeException();
+        }
 //        System.out.println("Test 1: " + this);
 
         List<User> users = userService.getAll();
@@ -119,7 +127,7 @@ class UserServiceTest {
 
             // Также можно указать, что тест будет выполняться в отдельном потоке
             System.out.println(Thread.currentThread().getName());
-            Optional<User> user = assertTimeoutPreemptively(Duration.ofMillis(200), () -> {
+            Optional<User> user = assertTimeoutPreemptively(Duration.ofMillis(400), () -> {
                 System.out.println(Thread.currentThread().getName());
                 Thread.sleep(300);
                 return userService.login(REHAB.getUsername(), REHAB.getPassword());
@@ -157,7 +165,7 @@ class UserServiceTest {
             assertThrows(IllegalArgumentException.class, () -> userService.login(null, "password"));
         }
 
-//        @Test
+        //        @Test
         // Добавляем несклько выполнений тестов
         // Указываем сколько раз будет выполняться тест и как будет отображаться
         @RepeatedTest(value = 5, name = RepeatedTest.LONG_DISPLAY_NAME)
