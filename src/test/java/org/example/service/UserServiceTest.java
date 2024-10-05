@@ -3,7 +3,10 @@ package org.example.service;
 
 import org.example.TestBase;
 import org.example.dto.User;
-import org.example.extension.*;
+import org.example.extension.ConditionalExtension;
+import org.example.extension.PostProcessingExtension;
+import org.example.extension.ThrowableExtension;
+import org.example.extension.UserServiceParamResolver;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -66,6 +69,8 @@ class UserServiceTest extends TestBase {
         if (true) {
             throw new RuntimeException();
         }
+
+
 //        System.out.println("Test 1: " + this);
 
         List<User> users = userService.getAll();
