@@ -16,7 +16,7 @@ public class PostProcessingExtension implements TestInstancePostProcessor {
         Field[] declaredField = testInstance.getClass().getDeclaredFields();
         for (Field field : declaredField) {
             if (field.isAnnotationPresent(Order.class)) {
-                field.set(testInstance, new UserService());
+                field.set(testInstance, new UserService(null));
             }
         }
     }

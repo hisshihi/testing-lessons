@@ -2,6 +2,7 @@ package org.example.service;
 
 
 import org.example.TestBase;
+import org.example.dao.UserDao;
 import org.example.dto.User;
 import org.example.extension.ConditionalExtension;
 import org.example.extension.PostProcessingExtension;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -33,13 +35,14 @@ import static org.junit.jupiter.api.Assertions.*;
         UserServiceParamResolver.class,
         PostProcessingExtension.class,
         ConditionalExtension.class,
-        ThrowableExtension.class
+//        ThrowableExtension.class
 })
 class UserServiceTest extends TestBase {
 
     private static final User ARINA = User.of(1L, "Arina", "123");
     private static final User REHAB = User.of(2L, "rehab", "111");
     private UserService userService;
+    private UserDao userDao;
 
     static Stream<Arguments> getArgumentsForLoginTest() {
         return Stream.of(
@@ -56,9 +59,35 @@ class UserServiceTest extends TestBase {
     }
 
     @BeforeEach
-    void prepare(UserService userService) {
+    void prepare() {
 //        System.out.println("Before each: " + this);
-        this.userService = userService;
+        // Использовал mock, чтобы не вызывать реальный объект
+        this.userDao = Mockito.mock(UserDao.class);
+        this.userService = new UserService(userDao);
+    }
+
+    @Test
+    void shouldDeleteExistedUser() {
+        userService.add(REHAB);
+        // Это stub
+        /*
+        * Что делает эта строчка
+        * Верни true когда userDao вызываем метод delete и передаём id
+        * */
+        // Более универсальный
+        Mockito.doReturn(true).when(userDao).delete(REHAB.getId());
+
+        // Подходит не для всех случаев
+        // Есть возможность выполнять проверку последоватьно, для первого вызова будет true а для оставшихся будет false
+//        Mockito.when(userDao.delete(REHAB.getId()))
+//                .thenReturn(true)
+//                .thenReturn(false);
+
+        boolean deleteUser = userService.delete(REHAB.getId());
+//        System.out.println(userService.delete(REHAB.getId()));
+//        System.out.println(userService.delete(REHAB.getId()));
+
+        assertThat(deleteUser).isTrue();
     }
 
     @Test

@@ -1,19 +1,28 @@
 package org.example.service;
 
+import org.example.dao.UserDao;
 import org.example.dto.User;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static java.util.function.Function.*;
-import static java.util.stream.Collectors.*;
+import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 
 public class UserService {
 
     // Список пользователей, который будет хранить объекты User
     private final List<User> users = new ArrayList<>();
+    private final UserDao userDao;
+
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
+    }
+
+    public boolean delete(Long userId) {
+        if (userId != null) {
+            return userDao.delete(userId);
+        } else return false;
+    }
 
     // Метод для получения всех пользователей
     public List<User> getAll() {
