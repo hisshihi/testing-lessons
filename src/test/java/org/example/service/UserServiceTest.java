@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -62,7 +63,7 @@ class UserServiceTest extends TestBase {
     void prepare() {
 //        System.out.println("Before each: " + this);
         // Использовал mock, чтобы не вызывать реальный объект
-        this.userDao = Mockito.mock(UserDao.class);
+        this.userDao = Mockito.spy(new UserDao());
         this.userService = new UserService(userDao);
     }
 
@@ -86,6 +87,16 @@ class UserServiceTest extends TestBase {
         boolean deleteUser = userService.delete(REHAB.getId());
 //        System.out.println(userService.delete(REHAB.getId()));
 //        System.out.println(userService.delete(REHAB.getId()));
+
+        // Проверка, сколько раз был вызван тот или иной метод
+//        Mockito.verify(userDao, Mockito.times(2)).delete(REHAB.getId());
+
+        // Перехват аргумента, которые передаются в метод мока
+        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+        // Проверка, что метод delete был вызван всего один раз
+        Mockito.verify(userDao, Mockito.times(1)).delete(longArgumentCaptor.capture());
+        // Проверка захваченного аргумента
+        assertThat(longArgumentCaptor.getValue()).isEqualTo(25L);
 
         assertThat(deleteUser).isTrue();
     }

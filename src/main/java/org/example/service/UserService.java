@@ -20,6 +20,7 @@ public class UserService {
 
     public boolean delete(Long userId) {
         if (userId != null) {
+            Long userLocalId = 25L;
             return userDao.delete(userId);
         } else return false;
     }
