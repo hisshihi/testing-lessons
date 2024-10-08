@@ -13,8 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @Tag("fast")
 @Tag("user")
@@ -36,13 +37,20 @@ import static org.junit.jupiter.api.Assertions.*;
         UserServiceParamResolver.class,
         PostProcessingExtension.class,
         ConditionalExtension.class,
+        MockitoExtension.class
 //        ThrowableExtension.class
 })
 class UserServiceTest extends TestBase {
 
     private static final User ARINA = User.of(1L, "Arina", "123");
     private static final User REHAB = User.of(2L, "rehab", "111");
+
+    @Captor
+    private ArgumentCaptor<Long> longArgumentCaptor;
+    // Для тестируемых объектов
+    @InjectMocks
     private UserService userService;
+    @Mock
     private UserDao userDao;
 
     static Stream<Arguments> getArgumentsForLoginTest() {
@@ -63,8 +71,18 @@ class UserServiceTest extends TestBase {
     void prepare() {
 //        System.out.println("Before each: " + this);
         // Использовал mock, чтобы не вызывать реальный объект
-        this.userDao = Mockito.spy(new UserDao());
-        this.userService = new UserService(userDao);
+//        this.userDao = Mockito.spy(new UserDao());
+//        this.userService = new UserService(userDao);
+
+        doReturn(true).when(userDao).delete(REHAB.getId());
+        lenient().when(userDao.delete(REHAB.getId())).thenReturn(true);
+    }
+
+    @Test
+    void throwExceptionIfDataBaseIsNotAvailable() {
+        doThrow(RuntimeException.class).when(userDao).delete(REHAB.getId());
+
+        assertThrows(RuntimeException.class, () -> userService.delete(REHAB.getId()));
     }
 
     @Test
@@ -76,7 +94,7 @@ class UserServiceTest extends TestBase {
         * Верни true когда userDao вызываем метод delete и передаём id
         * */
         // Более универсальный
-        Mockito.doReturn(true).when(userDao).delete(REHAB.getId());
+        doReturn(true).when(userDao).delete(REHAB.getId());
 
         // Подходит не для всех случаев
         // Есть возможность выполнять проверку последоватьно, для первого вызова будет true а для оставшихся будет false
@@ -92,11 +110,11 @@ class UserServiceTest extends TestBase {
 //        Mockito.verify(userDao, Mockito.times(2)).delete(REHAB.getId());
 
         // Перехват аргумента, которые передаются в метод мока
-        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
+//        ArgumentCaptor<Long> longArgumentCaptor = ArgumentCaptor.forClass(Long.class);
         // Проверка, что метод delete был вызван всего один раз
         Mockito.verify(userDao, Mockito.times(1)).delete(longArgumentCaptor.capture());
         // Проверка захваченного аргумента
-        assertThat(longArgumentCaptor.getValue()).isEqualTo(25L);
+        assertThat(longArgumentCaptor.getValue()).isEqualTo(REHAB.getId());
 
         assertThat(deleteUser).isTrue();
     }
