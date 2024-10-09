@@ -88,6 +88,11 @@ class UserServiceTest extends TestBase {
     @Test
     void shouldDeleteExistedUser() {
         userService.add(REHAB);
+
+//        BDDMockito.given(userDao.delete(REHAB.getId())).willReturn(true);
+//
+//        BDDMockito.willReturn(true).given(userDao).delete(REHAB.getId());
+
         // Это stub
         /*
         * Что делает эта строчка
@@ -140,6 +145,19 @@ class UserServiceTest extends TestBase {
     @Test
     void usersSizeIfUserAdded() {
 //        System.out.println("Test 2: " + this);
+
+        // BDD
+//        given
+        // Получение чего-либо, к примеру пользователя
+
+//        when
+        // Что будем тестировать
+
+//        then
+        // Тестируем
+
+        // Также после given может быть нескольок when и then
+
 
         userService.add(ARINA);
         userService.add(REHAB);
